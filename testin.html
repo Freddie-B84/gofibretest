@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watson Orchestrate Chat</title>
+
+  <script>
+    window.wxOConfiguration = {
+      orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
+      hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
+      rootElementID: "root",
+      deploymentPlatform: "ibmcloud",
+      crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:0b12d9ae-1699-4363-85d2-ab04cc176571::",
+      chatOptions: {
+        agentId: "19218c6f-267e-4bda-8007-d6adcc7d43c0",
+        agentEnvironmentId: "fe676649-fce2-47c4-9036-f4c7d96837ba"
+      },
+      layout: {
+        form: "float",
+        showOrchestrateHeader: true,
+        width: window.innerWidth * 0.3 + 'px',
+        height: window.innerHeight * 0.75 + 'px'
+      },
+      style: {
+        headerColor: '#DEF9ED',
+        userMessageBackgroundColor: '#DEF9ED',
+        primaryColor: '#ADEFD2'
+      }
+    };
+
+    setTimeout(function () {
+      const script = document.createElement('script');
+      script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+      script.onload = function () {
+        wxoLoader.init();
+
+        // Style Yes/No style option buttons
+        const processed = new Set();
+        function styleButtons() {
+          document.querySelectorAll('button').forEach(function (button) {
+            if (processed.has(button) || button.classList.contains('chatButton')) return;
+
+            const isSmallButton = button.offsetHeight < 50;
+            const hasShortText = button.textContent.trim().length < 50;
+            const notInHeader = !button.closest('.wxo-float-header');
+
+            if (isSmallButton && hasShortText && notInHeader) {
+              processed.add(button);
+              Object.assign(button.style, {
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                border: '1px solid #d1d1d1',
+                transition: 'all 0.2s ease'
+              });
+              button.onmouseenter = function () {
+                Object.assign(button.style, { backgroundColor: '#ADEFD2', borderColor: '#ADEFD2' });
+              };
+              button.onmouseleave = function () {
+                Object.assign(button.style, { backgroundColor: '#ffffff', borderColor: '#d1d1d1' });
+              };
+            }
+          });
+        }
+
+        new MutationObserver(function () {
+          setTimeout(styleButtons, 100);
+        }).observe(document.body, { childList: true, subtree: true });
+
+        styleButtons();
+        setInterval(styleButtons, 500);
+      };
+      document.head.appendChild(script);
+    }, 0);
+  </script>
+
+  <style>
+    .wxo-float-container,
+    .wxo-float-container .chatButton {
+      right: 2px !important;
+      left: auto !important;
+    }
+
+    /* Mobile full-screen */
+    @supports (height: 100dvh) {
+      @media (max-width: 768px) {
+        #root .WxOChatContainer.WxOChatReset.WxOChatStyles .WxOLiteMainContainer,
+        #root .WxOChatContainer.WxOChatReset.WxOChatStyles .right-panel-content,
+        #root .WxOChatContainer.WxOChatReset.WxOChatStyles .wxoLiteWrapper {
+          height: calc(100dvh - 40px);
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
