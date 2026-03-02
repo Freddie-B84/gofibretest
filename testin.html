@@ -16,6 +16,17 @@
     }
     var isMobile = isMobileDevice();
 
+    // Chrome has a top address bar — use visualViewport to get the real available height
+    // Safari has a bottom bar so this works fine there too
+    function getViewportHeight() {
+      return window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    }
+    function getViewportTop() {
+      return window.visualViewport ? window.visualViewport.offsetTop : 0;
+    }
+
+    var TOP_OFFSET = 60;
+
     window.wxOConfiguration = {
       orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
       hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
@@ -27,12 +38,11 @@
         agentId: "19218c6f-267e-4bda-8007-d6adcc7d43c0",
         agentEnvironmentId: "fe676649-fce2-47c4-9036-f4c7d96837ba"
       },
-      // Always use float — CSS handles fullscreen on mobile
       layout: {
         form: "float",
         showOrchestrateHeader: true,
-        width: isMobile ? '100vw' : (window.innerWidth * 0.3) + 'px',
-        height: isMobile ? '100vh' : (window.innerHeight * 0.75) + 'px'
+        width: isMobile ? window.innerWidth + 'px' : (window.innerWidth * 0.3) + 'px',
+        height: isMobile ? (getViewportHeight() - TOP_OFFSET) + 'px' : (window.innerHeight * 0.75) + 'px'
       },
       style: {
         headerColor: '#DEF9ED',
@@ -46,6 +56,47 @@
       script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
       script.onload = function () {
         wxoLoader.init();
+
+        if (isMobile) {
+          function applyMobileOffset() {
+            // Use visualViewport for Chrome — it accounts for the address bar offset
+            var vvTop = getViewportTop();
+            var vvHeight = getViewportHeight();
+            var chatTop = vvTop + TOP_OFFSET;
+            var chatHeight = vvHeight - TOP_OFFSET;
+
+            document.querySelectorAll(
+              '.wxo-float-panel, .WxOChatContainer, .WxOLiteMainContainer'
+            ).forEach(function (el) {
+              if (el.offsetHeight > 100) {
+                el.style.setProperty('position', 'fixed', 'important');
+                el.style.setProperty('top', chatTop + 'px', 'important');
+                el.style.setProperty('left', '0', 'important');
+                el.style.setProperty('width', '100vw', 'important');
+                el.style.setProperty('height', chatHeight + 'px', 'important');
+                el.style.setProperty('max-height', chatHeight + 'px', 'important');
+                el.style.setProperty('border-radius', '0', 'important');
+              }
+            });
+          }
+
+          // Watch for DOM changes (open/close/reopen)
+          const observer = new MutationObserver(applyMobileOffset);
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+          });
+
+          // visualViewport resize fires when Chrome address bar shows/hides
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', applyMobileOffset);
+            window.visualViewport.addEventListener('scroll', applyMobileOffset);
+          } else {
+            window.addEventListener('resize', applyMobileOffset);
+          }
+        }
       };
       document.head.appendChild(script);
     }, 0);
@@ -57,43 +108,37 @@
       background: #ffffff;
     }
 
-    /* Desktop: keep button bottom right */
+    /* Desktop button position */
     .wxo-float-container .chatButton {
       right: 16px !important;
       left: auto !important;
       bottom: 16px !important;
     }
 
-    /* Mobile: force the chat window to be truly fullscreen */
+    /* Mobile CSS fallback */
     @media (max-width: 767px) {
-      /* The floating chat panel - offset from top to avoid Chrome address bar */
-      .wxo-float-container .wxo-float-panel,
-      .wxo-float-container .WxOChatContainer,
-      .wxo-float-container .WxOLiteMainContainer {
+      .wxo-float-panel,
+      .WxOChatContainer,
+      .WxOLiteMainContainer {
         position: fixed !important;
-        top: 60px !important;
+        /* Use safe-area-inset-top for notched phones + add offset for Chrome bar */
+        top: calc(env(safe-area-inset-top, 0px) + 60px) !important;
         left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        height: calc(100% - 60px) !important;
-        max-width: 100vw !important;
+        width: 100vw !important;
+        height: calc(100vh - 60px) !important;
         max-height: calc(100vh - 60px) !important;
         border-radius: 0 !important;
-        margin: 0 !important;
       }
 
-      /* Support dynamic viewport height on iOS */
       @supports (height: 100dvh) {
-        .wxo-float-container .wxo-float-panel,
-        .wxo-float-container .WxOChatContainer,
-        .wxo-float-container .WxOLiteMainContainer {
+        .wxo-float-panel,
+        .WxOChatContainer,
+        .WxOLiteMainContainer {
           height: calc(100dvh - 60px) !important;
           max-height: calc(100dvh - 60px) !important;
         }
       }
 
-      /* Keep launcher button visible and accessible */
       .wxo-float-container .chatButton {
         right: 15px !important;
         bottom: 15px !important;
