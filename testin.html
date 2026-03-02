@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Watson Orchestrate Chat</title>
   <script>
     // Mobile detection (from Nuno Santos)
@@ -93,21 +93,6 @@
       right: 16px !important;
       left: auto !important;
       bottom: 16px !important;
-    }
-    /* Fix for Chrome mobile - ensure header is visible */
-    @media (max-width: 767px) {
-      .WxOChatContainer,
-      .WxOChatContainer.WxOChatReset.WxOChatStyles {
-        padding-top: env(safe-area-inset-top, 0px) !important;
-      }
-      /* Ensure the header/minimize bar is visible */
-      .wxo-float-header,
-      .WxOChatContainer header,
-      .WxOChatContainer .wxo-chat-header {
-        position: relative !important;
-        z-index: 10002 !important;
-        margin-top: env(safe-area-inset-top, 0px) !important;
-      }
     }
   </style>
 </head>
