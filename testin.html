@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Watson Orchestrate Chat</title>
   <script>
     // Mobile detection (from Nuno Santos)
@@ -14,9 +14,7 @@
       let isUAMobile = navigator.userAgentData?.mobile;
       return isMobileUA || isSmallScreen || isUAMobile;
     }
-
     var isMobile = isMobileDevice();
-
     window.wxOConfiguration = {
       orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
       hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
@@ -42,12 +40,10 @@
         primaryColor: '#ADEFD2'
       }
     };
-
     // Apply fullscreen-overlay for mobile
     if (isMobile) {
       window.wxOConfiguration.layout = { form: "fullscreen-overlay" };
     }
-
     setTimeout(function () {
       const script = document.createElement('script');
       script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
@@ -97,6 +93,21 @@
       right: 16px !important;
       left: auto !important;
       bottom: 16px !important;
+    }
+    /* Fix for Chrome mobile - ensure header is visible */
+    @media (max-width: 767px) {
+      .WxOChatContainer,
+      .WxOChatContainer.WxOChatReset.WxOChatStyles {
+        padding-top: env(safe-area-inset-top, 0px) !important;
+      }
+      /* Ensure the header/minimize bar is visible */
+      .wxo-float-header,
+      .WxOChatContainer header,
+      .WxOChatContainer .wxo-chat-header {
+        position: relative !important;
+        z-index: 10002 !important;
+        margin-top: env(safe-area-inset-top, 0px) !important;
+      }
     }
   </style>
 </head>
