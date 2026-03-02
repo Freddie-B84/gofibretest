@@ -6,9 +6,13 @@
   <title>Watson Orchestrate Chat</title>
   <script>
     // Mobile detection (from Nuno Santos)
- function isMobileDevice() {
-    // Simplified: use screen width only (more reliable)
-    return window.matchMedia("(max-width: 767px)").matches;
+    function isMobileDevice() {
+      let userAgent = navigator.userAgent.toLowerCase();
+      let mobileRegex = /android|iphone|ipad|ipod|blackberry|windows phone/;
+      let isMobileUA = mobileRegex.test(userAgent);
+      let isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
+      let isUAMobile = navigator.userAgentData?.mobile;
+      return isMobileUA || isSmallScreen || isUAMobile;
   }
   var isMobile = isMobileDevice();
     window.wxOConfiguration = {
@@ -64,4 +68,5 @@
   <div id="root"></div>
 </body>
 </html>
+
 
