@@ -46,6 +46,18 @@
       script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
       script.onload = function () {
         wxoLoader.init();
+        
+        // Force top offset on mobile
+        if (isMobile) {
+          setInterval(function() {
+            var container = document.querySelector('.WxOChatContainer');
+            if (container && container.offsetHeight > 100) {
+              container.style.setProperty('top', '40px', 'important');
+              container.style.setProperty('height', 'calc(100dvh - 40px)', 'important');
+              container.style.setProperty('max-height', 'calc(100dvh - 40px)', 'important');
+            }
+          }, 200);
+        }
       };
       document.head.appendChild(script);
     }, 0);
