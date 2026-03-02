@@ -31,8 +31,8 @@
         : {
             form: "float",
             showOrchestrateHeader: true,
-            width: (window.innerWidth * 0.3) + 'px',
-            height: (window.innerHeight * 0.75) + 'px'
+            width: "380px",
+            height: "600px"
           },
       style: {
         headerColor: '#DEF9ED',
@@ -76,8 +76,7 @@
         new MutationObserver(function () {
           setTimeout(styleButtons, 100);
         }).observe(document.body, { childList: true, subtree: true });
-        styleButtons();
-        setInterval(styleButtons, 500);
+        styleButtons()
       };
       document.head.appendChild(script);
     }, 0);
@@ -100,3 +99,4 @@
   <div id="root"></div>
 </body>
 </html>
+
