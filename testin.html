@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watson Orchestrate Chat - Simple Test</title>
+    <title>Watson Orchestrate Chat</title>
     
     <style>
         body {
@@ -11,19 +11,6 @@
             padding: 20px;
             font-family: 'IBM Plex Sans', Arial, sans-serif;
             background: #f4f4f4;
-        }
-
-        h1 {
-            color: #161616;
-            margin-bottom: 10px;
-        }
-
-        .info {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         /* Mobile-specific styles */
@@ -41,23 +28,14 @@
             body {
                 padding: 10px;
             }
-            h1 {
-                font-size: 20px;
-            }
         }
     </style>
 </head>
 <body>
-    <h1>Watson Orchestrate Chat Test</h1>
-    <div class="info">
-        <p>Chat launcher should appear in bottom right corner.</p>
-        <p>On mobile: Full-screen overlay | On desktop: Popup window</p>
-    </div>
-
     <div id="root"></div>
 
     <script>
-        // Mobile device detection
+        // Mobile device detection function
         function isMobileDevice() {
             let userAgent = navigator.userAgent.toLowerCase();
             let mobileRegex = /android|iphone|ipad|ipod|blackberry|windows phone/;
@@ -67,12 +45,24 @@
             return isMobileUA || isSmallScreen || isUAMobile;
         }
 
-        // Set layout based on device
+        // Watson Orchestrate configuration
+        window.wxOConfiguration = {
+            orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_99155f47-ac2f-4206-b7c0-bcaf4e8f3838",
+            hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
+            rootElementID: "root",
+            deploymentPlatform: "ibmcloud",
+            crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:99155f47-ac2f-4206-b7c0-bcaf4e8f3838::",
+            chatOptions: {
+                agentId: "97270877-6094-4943-abaa-87223db49749", 
+                agentEnvironmentId: "263324b4-aaf5-496c-b6f3-b8aa39719722",
+            }
+        };
+
+        // Add mobile layout configuration
         var isMobile = isMobileDevice();
-        var layout;
         
         if (isMobile) {
-            layout = {
+            window.wxOConfiguration.layout = {
                 form: "float",
                 width: "100%",
                 height: "100%"
@@ -81,48 +71,22 @@
         } else {
             var popUpWidth = "" + (0.5 * document.documentElement.clientWidth) + "px";
             var popUpHeight = "" + (0.75 * document.documentElement.clientHeight) + "px";
-            layout = {
+            window.wxOConfiguration.layout = {
                 width: popUpWidth,
                 height: popUpHeight
             };
             console.log("Desktop detected - using popup window");
         }
 
-        // Watson Orchestrate configuration
-        window.wxOConfiguration = {
-            orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
-            hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
-            rootElementID: "root",
-            showLauncher: true,
-            crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:0b12d9ae-1699-4363-85d2-ab04cc176571::",
-            deploymentPlatform: "ibmcloud",
-            chatOptions: {
-                agentId: "0ce1ab15-d6db-4f85-8083-a201e55f2bea",
-                agentEnvironmentId: "eeef9d2f-930b-48c5-9234-147aca6cff4d"
-            },
-            header: {
-                showAiDisclaimer: false
-            },
-            style: {
-                headerColor: "#DEF9ED",
-                userMessageBackgroundColor: "#DEF9ED",
-                primaryColor: "#ADEFD2"
-            },
-            layout: layout
-        };
-
         // Load Watson Orchestrate
-        const wxoScript = document.createElement('script');
-        wxoScript.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
-        wxoScript.addEventListener('load', function () {
-            console.log("Watson Orchestrate loaded");
-            wxoLoader.init();
-        });
-        wxoScript.addEventListener('error', function() {
-            console.error("Failed to load Watson Orchestrate");
-            document.querySelector('.info').innerHTML += '<p style="color: red; margin-top: 10px;">⚠️ Failed to load chat. Check internet connection.</p>';
-        });
-        document.head.appendChild(wxoScript);
+        setTimeout(function () {
+            const script = document.createElement('script');
+            script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+            script.addEventListener('load', function () {
+                wxoLoader.init();
+            });
+            document.head.appendChild(script);
+        }, 0);
     </script>
 </body>
 </html>
