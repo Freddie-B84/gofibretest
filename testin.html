@@ -3,90 +3,794 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watson Orchestrate Chat</title>
-    
+    <title>GoFibre - Full Fibre Broadband</title>
     <style>
-        body {
+        /* Chat container - allow clicks through when hidden */
+        #root {
+            pointer-events: none !important;
+        }
+        
+        /* Only Digby launcher should capture clicks initially */
+        #digby-launcher {
+            pointer-events: auto !important;
+        }
+
+        /* Enable pointer events for chat ONLY when it's visible (not transformed away) */
+        #root .WxOChatContainer:not([style*="translateY(110vh)"]) {
+            pointer-events: auto !important;
+        }
+
+        /* Ensure wxo-float-container doesn't block when chat is hidden */
+        #root .wxo-float-container {
+            pointer-events: none !important;
+        }
+
+        /* But allow pointer events on the actual chat window inside */
+        #root .wxo-float-container .wxo-float,
+        #root .wxo-float-container [class*="Chat"],
+        #root .wxo-float-container [class*="Main"] {
+            pointer-events: auto !important;
+        }
+
+        /* Hide Watson's default launcher button — Digby replaces it */
+        .wxo-float-container .chatButton,
+        button.chatButton {
+            display: none !important;
+        }
+
+        /* Base styles */
+        * {
             margin: 0;
-            padding: 20px;
-            font-family: 'IBM Plex Sans', Arial, sans-serif;
-            background: #f4f4f4;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Mobile-specific styles */
-        @supports (height: 100dvh) {
-            @media (max-width: 768px) {
-                #root .WxOChatContainer.WxOChatReset.WxOChatStyles .WxOLiteMainContainer,
-                #root .WxOChatContainer.WxOChatReset.WxOChatStyles .right-panel-content,
-                #root .WxOChatContainer.WxOChatReset.WxOChatStyles .wxoLiteWrapper {
-                    height: calc(100dvh - 40px);
-                }
-            }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #222a35;
+            background-color: #fff;
         }
 
+        /* Header section */
+        .header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+            align-items: center;
+        }
+
+        .header-left {
+            background-color: #1a5540;
+            padding: 80px 60px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .header-right {
+            background: linear-gradient(135deg, #ADEFD2 0%, #DEF9ED 100%);
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+
+        .header-image {
+            max-width: 400px;
+        }
+
+        /* Features section */
+        .features {
+            padding: 80px 20px;
+            background-color: #222a35;
+            color: #fff;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background-color: rgba(173, 239, 210, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ADEFD2;
+        }
+
+        /* Packages section */
+        .packages {
+            padding: 80px 20px;
+            background-color: #DEF9ED;
+        }
+
+        .packages h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: #222a35;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .package-card {
+            background-color: #fff;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .package-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #222a35;
+        }
+
+        .package-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a5540;
+            margin-bottom: 20px;
+        }
+
+        .package-features {
+            list-style: none;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .package-features li {
+            padding: 10px 0;
+        }
+
+        .package-features li:before {
+            content: "✓ ";
+            color: #ADEFD2;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .cta-button {
+            background-color: #222a35;
+            color: #fff;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #222a35;
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Mobile responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
+            .header {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .header-left {
+                padding: 40px 30px;
+            }
+
+            /* WXO Chat Mobile Fix - Full Screen */
+            #root .wxo-float-container {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                background: none;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border-radius: 0 !important;
+                z-index: 9999 !important;
+            }
+
+            #root .wxo-float {
+                max-width: 100vw;
+                max-height: 100vh;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Watson Orchestrate root element -->
     <div id="root"></div>
 
+    <!-- Page content -->
+    <header class="header">
+        <div class="header-left">
+            <h1>Globally better broadband from Scotland.</h1>
+            <p>Ultra fast, ultra friendly, ultra local</p>
+            <p>Pop in your postcode and get the best package for your home.</p>
+            
+            <!-- TEST BUTTON - Click should work even when chat is loaded -->
+            <a href="https://www.google.com" target="_blank" style="display: inline-block; margin-top: 20px; padding: 15px 30px; background-color: #ADEFD2; color: #222a35; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;">
+                🧪 TEST BUTTON - Click to open Google
+            </a>
+        </div>
+        <div class="header-right">
+            <img src="https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud/library/v1/images/digby.png" 
+                 alt="GoFibre Mascot" 
+                 class="header-image">
+        </div>
+    </header>
+
+    <section class="features">
+        <h2>Why Choose GoFibre?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>🚀 Ultra-Fast Speeds</h3>
+                <p>Full fibre broadband delivering speeds up to 1000Mbps.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🏠 Truly Local</h3>
+                <p>We live in the communities we serve.</p>
+            </div>
+            <div class="feature-card">
+                <h3>💚 Great Customer Service</h3>
+                <p>Our friendly local team answers calls in under 30 seconds.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Reliable Connection</h3>
+                <p>99.9% uptime guarantee with dedicated support.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="packages">
+        <h2>Our Packages</h2>
+        <div class="packages-grid">
+            <div class="package-card">
+                <h3>Fibre 150</h3>
+                <div class="package-price">£25<span style="font-size:1rem">/month</span></div>
+                <ul class="package-features">
+                    <li>150Mbps download speed</li>
+                    <li>30Mbps upload speed</li>
+                    <li>Perfect for browsing & streaming</li>
+                </ul>
+            </div>
+            <div class="package-card">
+                <h3>Fibre 300</h3>
+                <div class="package-price">£30<span style="font-size:1rem">/month</span></div>
+                <ul class="package-features">
+                    <li>300Mbps download speed</li>
+                    <li>60Mbps upload speed</li>
+                    <li>Great for families</li>
+                </ul>
+            </div>
+            <div class="package-card">
+                <h3>Fibre 500</h3>
+                <div class="package-price">£35<span style="font-size:1rem">/month</span></div>
+                <ul class="package-features">
+                    <li>500Mbps download speed</li>
+                    <li>100Mbps upload speed</li>
+                    <li>Ideal for heavy users</li>
+                </ul>
+            </div>
+            <div class="package-card">
+                <h3>Fibre MAX</h3>
+                <div class="package-price">£45<span style="font-size:1rem">/month</span></div>
+                <ul class="package-features">
+                    <li>1000Mbps download speed</li>
+                    <li>200Mbps upload speed</li>
+                    <li>Ultimate performance</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 GoFibre. All rights reserved.</p>
+    </footer>
+
+    <!-- All JavaScript embedded below -->
     <script>
-        // Mobile device detection function
-        function isMobileDevice() {
-            let userAgent = navigator.userAgent.toLowerCase();
-            let mobileRegex = /android|iphone|ipad|ipod|blackberry|windows phone/;
-            let isMobileUA = mobileRegex.test(userAgent);
-            let isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
-            let isUAMobile = navigator.userAgentData?.mobile;
-            return isMobileUA || isSmallScreen || isUAMobile;
-        }
+/*******************************************************************
+ **                                                               **
+ ** moreIQ library loader                                         **
+ **                                                               **
+ *******************************************************************/
+ 
+let chatInstance=null;
 
-        // Watson Orchestrate configuration
-        window.wxOConfiguration = {
-            orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_99155f47-ac2f-4206-b7c0-bcaf4e8f3838",
-            hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
-            rootElementID: "root",
-            deploymentPlatform: "ibmcloud",
-            crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:99155f47-ac2f-4206-b7c0-bcaf4e8f3838::",
-            chatOptions: {
-                agentId: "97270877-6094-4943-abaa-87223db49749", 
-                agentEnvironmentId: "263324b4-aaf5-496c-b6f3-b8aa39719722",
+function openChat() {
+    if (chatInstance) {
+        if (typeof chatInstance.open === "function") { chatInstance.open(); return true; }
+        if (typeof chatInstance.setOpen === "function") { chatInstance.setOpen(true); return true; }
+    }
+    var btn = document.querySelector('button.chatButton, button[aria-label*="chat" i]');
+    if (btn) { btn.click(); return true; }
+    return false;
+}
+
+
+const inner_moreiqLoader =  function (){
+    
+    const processed = new Set();
+    const disabled = new Set();
+    const replacedCards = new Set();
+
+
+    console.log('Loading moreIQ ')
+
+
+    
+    // Opening hours configuration
+    // Opening hours configuration
+    const openingHours = {
+        regular: {
+            0: null, // Sunday - closed
+            1: { open: 8, close: 20 }, // Monday
+            2: { open: 8, close: 20 }, // Tuesday
+            3: { open: 8, close: 20 }, // Wednesday
+            4: { open: 8, close: 20 }, // Thursday
+            5: { open: 8, close: 20 }, // Friday
+            6: { open: 9, close: 17 }  // Saturday
+        },
+        closed: ['12-25', '12-26', '01-01'],
+        reduced: {
+            '12-24': { open: 9, close: 17 },
+            '12-31': { open: 9, close: 17 }
+        }
+    };
+
+    // Out of hours message
+    const outOfHoursMessage = {
+        title: "Customer Support Unavailable",
+        intro: "Unfortunately, our customer support team is currently unavailable. We're here to help during the following hours:",
+        hours: [
+            { day: "Monday – Friday", time: "8:00 AM – 8:00 PM" },
+            { day: "Saturday", time: "9:00 AM – 5:00 PM" },
+            { day: "Sunday", time: "Closed" }
+        ],
+        holidayNote: "Christmas Eve & New Year's Eve: 9:00 AM – 5:00 PM<br>Closed: Christmas Day, Boxing Day & New Year's Day",
+        outro: "Please contact us again during our opening hours."
+    };
+
+    // Test mode - set to null for production
+    //const testDate = '2025-12-25T10:00:00'; // Set to null for production
+    const testDate = null;
+
+
+
+    function isMobileDevice() {
+        let userAgent = navigator.userAgent.toLowerCase();
+        let mobileRegex = /android|iphone|ipad|ipod|blackberry|windows phone/;
+        let isMobileUA = mobileRegex.test(userAgent);
+        let isSmallScreen = window.matchMedia("(max-width: 767px)").matches;
+        let isUAMobile = navigator.userAgentData?.mobile;
+        return isMobileUA || isSmallScreen || isUAMobile;
+    }
+
+    const moreiqOpenChat = function () {
+        if (this.instance) {
+            if (typeof this.instance.open === "function") { this.instance.open(); return true; }
+            if (typeof this.instance.setOpen === "function") { this.instance.setOpen(true); return true; }
+        }
+        var btn = document.querySelector('button.chatButton, button[aria-label*="chat" i]');
+        if (btn) { btn.click(); return true; }
+        return false;
+    }
+
+    const moreiqSendToChat = function (msg) {
+        if (!msg || this.messageSent) return;
+
+        var attempts = 0;
+        var timer = setInterval(function() {
+            attempts++;
+            this.openChat();
+            if (attempts >= 25) clearInterval(timer);
+        }, 120);
+
+        setTimeout(function() {
+            if (this.instance) {
+                try {
+                    this.instance.send(msg);
+                    this.messageSent = true;
+                    console.log("Message sent:", msg);
+                } catch(e) {
+                    console.error("Send failed:", e);
+                    this.messageQueue.push(msg);
+                }
+            } else {
+                console.log("No instance yet, queued:", msg);
+                this.messageQueue.push(msg);
             }
-        };
+        }, 1500);
+    }
 
-        // Add mobile layout configuration
-        var isMobile = isMobileDevice();
+    var isMobile = isMobileDevice();
+
+    window.miqConfiguration={
+      versionBuild:"2026-03-23T16:46:19.408234",
+      tenantKey:"bW9yZWlxOmlkOjAwMDAwMDAwMDAwMTowMDAxOjAwOTpBQUFBQUFB",
+      orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
+      orchestrationId: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
+      hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
+      
+      ibm:{
+        loader: "https://eu-gb.watson-orchestrate.cloud.ibm.com/wxochat/wxoLoader.js?embed=false&debug=true"
+      },
+      rootElementID: "root",
+      crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:0b12d9ae-1699-4363-85d2-ab04cc176571::",
+      agentId: "0ce1ab15-d6db-4f85-8083-a201e55f2bea",
+      agentEnvironmentId: "eeef9d2f-930b-48c5-9234-147aca6cff4d",
+      
+      moreiq:{
+        main: "https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud/library/v1/moreiq-main.umd.js",
+        uri: "https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud",
         
-        if (isMobile) {
-            window.wxOConfiguration.layout = {
-                form: "float",
-                width: "100%",
-                height: "100%"
-            };
-            console.log("Mobile detected - using float layout with 100% dimensions");
-        } else {
-            var popUpWidth = "" + (0.5 * document.documentElement.clientWidth) + "px";
-            var popUpHeight = "" + (0.75 * document.documentElement.clientHeight) + "px";
-            window.wxOConfiguration.layout = {
-                width: popUpWidth,
-                height: popUpHeight
-            };
-            console.log("Desktop detected - using popup window");
+      },
+      layout: {
+        selectedButton : {
+            backgroundColor: "#ADEFD2",
+            borderColor: "#ADEFD2"
+        },
+        nonSelectedButton : {
+            backgroundColor: "#ffffff",
+            borderColor: "#d1d1d1"
+        }
+      }
+    }
+
+    var isMobile = isMobileDevice();
+
+    // Color configuration
+    var selectColor = "#DEF9ED";
+    // "#ADEFD2"
+    var selectedButton = {
+      backgroundColor: selectColor,
+      borderColor: selectColor
+    };
+    var nonSelectedButton = {
+      backgroundColor: "#ffffff",
+      borderColor: "#d1d1d1"
+    };
+
+    document.onload = function() {
+      console.log('DOM is ready!');
+    };
+
+    /****************************************** CUSTOM CODE *****************/
+    
+    // Opening hours check function
+        function isWithinOpeningHours() {
+            const now = window?.testDate ? new Date(testDate) : new Date();
+
+            const day = now.getDay();
+            const time = now.getHours() + (now.getMinutes() / 60);
+            const dateKey = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+
+            // Check if closed date
+            if (openingHours.closed.includes(dateKey)) return false;
+
+            // Check if reduced hours date
+            if (openingHours.reduced[dateKey]) {
+                const hours = openingHours.reduced[dateKey];
+                return (time >= hours.open && time < hours.close);
+            }
+
+            // Check regular hours
+            const hours = openingHours.regular[day];
+            if (!hours) return false;
+            return (time >= hours.open && time < hours.close);
         }
 
-        // Load Watson Orchestrate
-        setTimeout(function () {
-            const script = document.createElement('script');
-            script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
-            script.addEventListener('load', function () {
-                wxoLoader.init();
+        // Function to create out of hours message
+        function createOutOfHoursElement() {
+            const div = document.createElement('div');
+            div.className = 'out-of-hours-card';
+
+            let hoursListHTML = outOfHoursMessage.hours.map(h =>
+                `<li><strong>${h.day}:</strong> ${h.time}</li>`
+            ).join('');
+
+            div.innerHTML = `
+                <h3>${outOfHoursMessage.title}</h3>
+                <p>${outOfHoursMessage.intro}</p>
+                <ul class="hours-list">
+                    ${hoursListHTML}
+                </ul>
+                    <strong>Holiday Hours:</strong><br>
+                <p class="holiday-note">
+                    ${outOfHoursMessage.holidayNote}
+                </p>
+                <p>${outOfHoursMessage.outro}</p>
+            `;
+            return div;
+        }
+
+        // Function to hide live agent card and show out of hours message
+        function checkAndReplaceLiveAgentCard() {
+            if (isWithinOpeningHours()) return;
+
+            const allButtons = document.querySelectorAll('button');
+            allButtons.forEach(button => {
+                if (button.textContent.includes('Connect to agent') && !replacedCards.has(button)) {
+                    let parent = button.parentElement;
+                    while (parent && !parent.classList.contains('agentResponse') && parent.tagName !== 'BODY') {
+                        parent = parent.parentElement;
+                    }
+
+                    if (parent && parent.classList.contains('agentResponse')) {
+                        const cardContent = button.closest('[class*="card"], [class*="Card"]') || button.parentElement.parentElement;
+                        if (cardContent) {
+                            cardContent.classList.add('hidden-agent-card');
+                        }
+
+                        if (!parent.querySelector('.out-of-hours-card')) {
+                            parent.appendChild(createOutOfHoursElement());
+                        }
+
+                        replacedCards.add(button);
+                    }
+                }
             });
-            document.head.appendChild(script);
-        }, 0);
+        }
+
+        // Function to style buttons
+        function styleButtons() {
+            document.querySelectorAll(".cds--btn--disabled").forEach(button => {
+                if (disabled.has(button)) return;
+
+                if (button.className.indexOf("cds--btn--secondary") != -1) {
+                    Object.assign(button.style, selectedButton);
+                } else {
+                    Object.assign(button.style, nonSelectedButton);
+                }
+
+                button.onmouseenter = function() {};
+                button.onmouseleave = function() {};
+                disabled.add(button);
+            });
+
+            document.querySelectorAll(".cds--btn--tertiary").forEach(button => {
+                if (processed.has(button)) return;
+
+                Object.assign(button.style, {
+                    backgroundColor: "#ffffff",
+                    color: "#000000",
+                    border: "1px solid #d1d1d1",
+                    transition: "all 0.2s ease"
+                });
+
+                button.onmouseenter = () => Object.assign(button.style, selectedButton);
+                button.onmouseleave = () => Object.assign(button.style, nonSelectedButton);
+                processed.add(button);
+            });
+        }
+
+    /************************************************************************/
+
+
+    window.wxOConfiguration = {
+      orchestrationID: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
+      hostURL: "https://eu-gb.watson-orchestrate.cloud.ibm.com",
+      rootElementID: "root",
+      showLauncher: true,
+      crn: "crn:v1:bluemix:public:watsonx-orchestrate:eu-gb:a/95f3b39ecb0a4fd7b5f71872005ef2f5:0b12d9ae-1699-4363-85d2-ab04cc176571::",
+
+      chatOptions: {
+        agentId: "0ce1ab15-d6db-4f85-8083-a201e55f2bea",
+        agentEnvironmentId: "eeef9d2f-930b-48c5-9234-147aca6cff4d",
+        onLoad: function (instance){
+          moreiq.instance= instance
+          
+            try {
+                instance.on("chat:ready", function() {
+                    console.log("Chat ready!");
+                    while (moreiq.messageQueue.length) {
+                        try { moreiq.instance.send(moreiq.messageQueue.shift()); } catch(e) {}
+                    }
+                });
+                instance.on('receive', function() {
+                    moreiq.messageSent = false;
+                });
+            } catch(e) {}
+
+          moreiq.bindChatLoad(instance);
+          chatInstance = instance;
+          
+          console.log('Chat loaded, binding feedback handlers...');
+          // Use the saved reference
+          moreiq.feedback.bindChatLoad(instance);
+          console.log('Feedback handlers bound successfully');
+
+          // Create custom Digby launcher
+          var wrapper = document.createElement("div");
+          wrapper.id = "digby-launcher";
+          wrapper.innerHTML = `
+              <div id="digby-bubble">Need help? Ask me anything?</div>
+              <img id="digby-img" width="120" height="96" src="https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud/library/v1/images/digby.png" alt="Digby"
+              onclick="moreiq.openChat();"
+              />
+          `;
+          document.body.appendChild(wrapper);
+
+          
+
+        }
+      },
+      
+      serviceDesk: {
+        customFactory: function (parameters) {
+          return moreiq.buildServiceDesk(parameters)
+        }
+      },
+      
+      header: {
+        showResetButton: true,
+        showAiDisclaimer: false,
+        showBackgroundGradient: true,
+      },
+      layout: {
+        form: "float",
+        width: "" + (0.5 * document.documentElement.clientWidth) + "px",
+        height: "" + (0.75 * document.documentElement.clientHeight) + "px",
+        showOrchestrateHeader: true,
+        customElement: document.getElementById("root")
+      },
+      style: {
+        headerColor: "#DEF9ED",
+        userMessageBackgroundColor: "#DEF9ED",
+        primaryColor: "#ADEFD2",
+        showBackgroundGradient: true,
+      },
+      deploymentPlatform: "ibmcloud"
+    };
+
+    if (isMobile){
+      window.wxOConfiguration.layout.form="float";
+      window.wxOConfiguration.layout.width= "100vw";
+      window.wxOConfiguration.layout.height= "100vh";
+    }
+
+    setTimeout(function () {
+        let script = document.createElement('script');
+        script.src = "https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud/library/v1/moreiq-main.umd.js?timestamp=2026-03-23T16:46:19.408234"
+        script.addEventListener('load', function () {
+
+          const list = document.getElementById(miqConfiguration.rootElementID)
+          let div = null
+          console.log(`root ${list}`)
+          if (!list || list.length==0){
+            div = document.createElement('div');
+            div.id = miqConfiguration.rootElementID;
+            document.body.insertBefore(div,document.body.firstChild)
+            console.log(`root not present : added`)
+          }  else {
+            console.log(`root present`)
+          }
+          let rootElement = document.getElementById(miqConfiguration.rootElementID)
+          
+
+          moreiq.instance = null;
+          moreiq.nessageSent = false;
+          moreiq.messageQueue = [];
+          moreiq.openChat = moreiqOpenChat;
+          moreiq.sendToChat = moreiqSendToChat;
+
+          console.log("Root Element! "+rootElement);
+          
+          console.log("CALLING INIT")
+          moreiq.init();
+
+          
+          
+          window.moreiq.feedback.configuration({
+              endpoint: "https://moreiq-api.1zb4frx8y298.eu-gb.codeengine.appdomain.cloud/api/moreiq/v1/feedback/gof",
+              orchestrationId: "95f3b39ecb0a4fd7b5f71872005ef2f5_0b12d9ae-1699-4363-85d2-ab04cc176571",
+              agentEnvironmentId: "eeef9d2f-930b-48c5-9234-147aca6cff4d",
+              agentId: "0ce1ab15-d6db-4f85-8083-a201e55f2bea"
+          });
+          
+          
+          script = document.createElement('script');
+          script.src = "https://eu-gb.watson-orchestrate.cloud.ibm.com/wxochat/wxoLoader.js?embed=false&debug=true";
+          script.addEventListener('load', function () {
+              
+              console.log("wxoLoader loaded");
+              wxoLoader.init();
+
+              new MutationObserver(() => {
+                  setTimeout(styleButtons, 100);
+                  setTimeout(checkAndReplaceLiveAgentCard, 100);
+              }).observe(document.body, {
+                  childList: true,
+                  subtree: true
+              });
+
+          });
+          document.head.appendChild(script);
+
+        });
+        document.head.appendChild(script);
+
+        let css = document.createElement('link');
+        css.id = "moreiq-custom-css";
+        css.rel = "stylesheet";
+        css.href = "https://moreiq-gofibre-gateway.225ur530qico.eu-gb.codeengine.appdomain.cloud/runtime/v1/app.css?timestamp=2026-03-23T16:46:19.408234&moreiqkey=bW9yZWlxOmlkOjAwMDAwMDAwMDAwMTowMDAxOjAwOTpBQUFBQUFB"
+
+        document.head.appendChild(css);
+
+    },0);
+
+}
+
+window.moreiqLoader =  function (defer){
+console.log(`Loading defered=${defer}`)
+  if (defer==undefined || defer){
+    console.log("Loading deferred - on windowload")
+    window.onload = function() {
+      inner_moreiqLoader();
+    };
+  } else {
+    console.log("Loading now")
+    inner_moreiqLoader();
+  }
+
+}
+
+window.toggleContainer=function(id){
+  let state = document.getElementById(id).style.display
+  console.log(`root element state [${state}]`)
+  if (state !== 'block'){
+    document.getElementById(id).style.display = 'block';
+  } else if (state === 'block'){
+    document.getElementById(id).style.display = 'none';
+  }
+  inner_moreiqLoader();
+}
+
+// Initialize the loader
+moreiqLoader(true);
     </script>
 </body>
 </html>
